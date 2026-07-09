@@ -1,0 +1,52 @@
+name: MergeProof
+description: Risk gate for AI-generated pull requests.
+author: MergeProof
+
+inputs:
+  github-token:
+    description: GitHub token used to read PR diffs and write review comments.
+    required: false
+  diff-file:
+    description: Optional path to a local diff file. If omitted, MergeProof reads the current pull request diff.
+    required: false
+  fail-threshold:
+    description: Risk score at or above which the action fails.
+    required: false
+    default: "70"
+  warn-threshold:
+    description: Risk score at or above which the action requires human review.
+    required: false
+    default: "42"
+  comment:
+    description: Set to true to create or update a MergeProof PR comment.
+    required: false
+    default: "true"
+  fail-on-blocked:
+    description: Set to true to fail the workflow when the decision is blocked.
+    required: false
+    default: "true"
+
+outputs:
+  score:
+    description: MergeProof risk score from 0 to 100.
+    value: ${{ steps.mergeproof.outputs.score }}
+  decision:
+    description: MergeProof decision.
+    value: ${{ steps.mergeproof.outputs.decision }}
+  comment-file:
+    description: Path to the generated review comment markdown file.
+    value: ${{ steps.mergeproof.outputs.comment-file }}
+
+runs:
+  using: composite
+  steps:
+    - id: mergeproof
+      shell: bash
+      run: node "$GITHUB_ACTION_PATH/src/mergeproof.js"
+      env:
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_DIFF_FILE: ${{ inputs.diff-file }}
+        INPUT_FAIL_THRESHOLD: ${{ inputs.fail-threshold }}
+        INPUT_WARN_THRESHOLD: ${{ inputs.warn-threshold }}
+        INPUT_COMMENT: ${{ inputs.comment }}
+        INPUT_FAIL_ON_BLOCKED: ${{ inputs.fail-on-blocked }}

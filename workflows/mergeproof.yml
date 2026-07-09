@@ -1,0 +1,23 @@
+name: MergeProof
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  mergeproof:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run MergeProof
+        uses: ./.github/actions/mergeproof
+        with:
+          github-token: ${{ github.token }}
+          fail-threshold: "70"
+          warn-threshold: "42"
+          comment: "true"
+          fail-on-blocked: "true"
